@@ -4,6 +4,23 @@ import pandas as pd
 import datetime
 # --- SYSTÈME DE LICENCE ---
 import hashlib
+if st.session_state.auth:
+    # 1. Établir la connexion à la base locale AVANT tout le reste
+    conn = sqlite3.connect('boutique.db', check_same_thread=False)
+    
+    # 2. Maintenant vous pouvez charger les données pour le Tableau de Bord
+    try:
+        low_stock_query = pd.read_sql_query(
+            "SELECT nom, quantite FROM produits WHERE quantite <= seuil_alerte", 
+            conn
+        )
+    except Exception as e:
+        low_stock_query = pd.DataFrame(columns=['nom', 'quantite'])
+        # Optionnel : st.warning("La table des produits n'est pas encore prête.")
+
+    # 3. Affichage du Menu Principal
+    # ... le reste de votre code (sidebar, menu, etc.)
+
 from supabase import create_client
 
 # Remplacez par vos vraies infos copiées à l'étape 2
@@ -548,6 +565,7 @@ elif menu == "☎️ Aide & Support":
             st.success("Votre demande a été enregistrée. Pacy MHA vous contactera sous peu.")
 
    
+
 
 
 
