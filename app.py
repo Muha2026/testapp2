@@ -142,28 +142,31 @@ if not licence_info or licence_info[0] != "Active":
 if "auth" not in st.session_state:
     st.session_state.auth, st.session_state.role, st.session_state.user = False, None, None
 
-# --- 2. CONNEXION (Modifié) ---
-# --- 2. CONNEXION (Version Sécurisée avec Supabase) ---
+# --- 2. CONNEXION (Version Cloud avec Supabase) ---
 if not st.session_state.auth:
     st.title("🔐 Bienvenue")
     with st.form("login"):
-        u = st.text_input("Identifiant").lower()
-        p = st.text_input("Mot de passe", type="password")
+        u = st.text_input("Identifiant").lower().strip() # .strip() enlève les espaces cachés
+        p = st.text_input("Mot de passe", type="password").strip()
+        
         if st.form_submit_button("Se connecter"):
-            # On vérifie maintenant dans une table 'utilisateurs' sur Supabase
             try:
+                # On interroge la table 'utilisateurs' de Supabase
                 res = supabase.table("utilisateurs").select("*").eq("identifiant", u).eq("mot_de_passe", p).execute()
+                
                 if res.data and len(res.data) > 0:
                     user_data = res.data[0]
                     st.session_state.auth = True
                     st.session_state.role = user_data['role']
                     st.session_state.user = u
-                    st.success("Connexion réussie !")
+                    st.success("✅ Connexion réussie !")
                     st.rerun()
                 else:
-                    st.error("Identifiants incorrects sur le serveur.")
+                    # Si on arrive ici, c'est que le nom ou le mot de passe est différent dans Supabase
+                    st.error("❌ Identifiants incorrects sur le serveur.")
+                    # Optionnel pour debug : st.write(f"Tentative avec : {u} et {p}") 
             except Exception as e:
-                st.error(f"Erreur de connexion : {e}")
+                st.error(f"⚠️ Erreur de connexion au serveur : {e}")
     st.stop()
 
 # --- SIDEBAR & MENU ---
@@ -542,6 +545,7 @@ elif menu == "☎️ Aide & Support":
             st.success("Votre demande a été enregistrée. Pacy MHA vous contactera sous peu.")
 
    
+
 
 
 
