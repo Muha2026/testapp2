@@ -450,12 +450,20 @@ elif menu == "⚙️ Paramètres":
     st.header("⚙️ Paramètres")
     t_compte, t_equipe = st.tabs(["👤 Mon Compte", "👥 Gestion Équipe"])
     with t_compte:
-        un = st.text_input("Nouveau Nom", value=st.session_state.user)
-        up = st.text_input("Nouveau Mot de passe", type="password")
-        if st.button("Sauvegarder"):
-            c = conn.cursor()
-            c.execute("UPDATE utilisateurs SET identifiant=?, mot_de_passe=? WHERE identifiant=?", (un, up, st.session_state.user))
-            conn.commit(); st.session_state.user = un; st.success("Mis à jour !"); st.rerun()
+    un = st.text_input("Nouveau Nom", value=st.session_state.user)
+    up = st.text_input("Nouveau Mot de passe", type="password")
+    if st.button("Sauvegarder"):
+        try:
+            # MISE À JOUR SUR SUPABASE
+            supabase.table("utilisateurs").update({
+                "identifiant": un.lower(), 
+                "mot_de_passe": up
+            }).eq("identifiant", st.session_state.user).execute()
+            
+            st.session_state.user = un.lower()
+            st.success("Mis à jour sur le serveur avec succès !")
+        except Exception as e:
+            st.error(f"Erreur de mise à jour : {e}")
     with t_equipe:
         st.subheader("Ajouter un nouvel employé")
         with st.form("creer_employe", clear_on_submit=True):
@@ -529,6 +537,7 @@ elif menu == "☎️ Aide & Support":
             st.success("Votre demande a été enregistrée. Pacy MHA vous contactera sous peu.")
 
    
+
 
 
 
