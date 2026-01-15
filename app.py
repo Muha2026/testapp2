@@ -39,6 +39,7 @@ def activate_software(nom_saisi, cle_saisie):
     try:
         # On interroge Supabase pour voir si le couple Nom/Clé existe
         res = supabase.table("licences").select("*").eq("nom", nom_saisi).eq("cle", cle_saisie).execute()
+        st.write("Données reçues :", res.data) # À supprimer après le test
         
         if len(res.data) > 0:
             # Si trouvé, on enregistre l'activation LOCALEMENT dans boutique.db
@@ -537,6 +538,7 @@ elif menu == "☎️ Aide & Support":
             st.success("Votre demande a été enregistrée. Pacy MHA vous contactera sous peu.")
 
    
+
 
 
 
