@@ -146,27 +146,30 @@ if "auth" not in st.session_state:
 if not st.session_state.auth:
     st.title("🔐 Bienvenue")
     with st.form("login"):
-        u = st.text_input("Identifiant").lower().strip() # .strip() enlève les espaces cachés
+        u = st.text_input("Identifiant").lower().strip()
         p = st.text_input("Mot de passe", type="password").strip()
         
         if st.form_submit_button("Se connecter"):
             try:
-                # On interroge la table 'utilisateurs' de Supabase
+                # REQUÊTE TEST
                 res = supabase.table("utilisateurs").select("*").eq("identifiant", u).eq("mot_de_passe", p).execute()
+                
+                # DEBUG : On affiche ce que Supabase répond réellement
+                if not res.data:
+                    st.warning(f"Le serveur ne trouve rien pour l'utilisateur : {u}")
+                else:
+                    st.write("Utilisateur trouvé :", res.data) # Pour voir si le mot de passe correspond
                 
                 if res.data and len(res.data) > 0:
                     user_data = res.data[0]
                     st.session_state.auth = True
                     st.session_state.role = user_data['role']
                     st.session_state.user = u
-                    st.success("✅ Connexion réussie !")
                     st.rerun()
                 else:
-                    # Si on arrive ici, c'est que le nom ou le mot de passe est différent dans Supabase
-                    st.error("❌ Identifiants incorrects sur le serveur.")
-                    # Optionnel pour debug : st.write(f"Tentative avec : {u} et {p}") 
+                    st.error("Identifiants incorrects sur le serveur.")
             except Exception as e:
-                st.error(f"⚠️ Erreur de connexion au serveur : {e}")
+                st.error(f"Erreur technique de connexion : {e}")
     st.stop()
 
 # --- SIDEBAR & MENU ---
@@ -545,6 +548,7 @@ elif menu == "☎️ Aide & Support":
             st.success("Votre demande a été enregistrée. Pacy MHA vous contactera sous peu.")
 
    
+
 
 
 
